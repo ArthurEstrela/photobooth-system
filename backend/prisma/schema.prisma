@@ -14,15 +14,22 @@ model Booth {
   payments  Payment[]
 }
 
+enum PaymentType {
+  PIX
+  CARD
+}
+
 model Payment {
   id           String   @id @default(uuid())
   boothId      String
   externalId   String?  @unique
   amount       Float
   status       String
+  paymentType  PaymentType @default(PIX)
   qrCode       String?
   qrCodeBase64 String?
-  createdAt    Date     @default(now())
+  checkoutUrl  String?
+  createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   booth        Booth    @relation(fields: [boothId], references: [id])
 }
