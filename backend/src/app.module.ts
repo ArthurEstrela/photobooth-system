@@ -1,6 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
+import { BullModule } from '@nestjs/bullmq';
 import { PaymentController } from './adapters/inbound/http/payment.controller';
 import { BoothWebsocketGateway } from './adapters/inbound/websocket/booth.gateway';
 import { CreatePaymentUseCase } from './core/use-cases/create-payment.usecase';
@@ -8,13 +9,29 @@ import { ConfirmPaymentUseCase } from './core/use-cases/confirm-payment.usecase'
 import { ExpirePaymentUseCase } from './core/use-cases/expire-payment.usecase';
 import { MercadoPagoAdapter } from './adapters/outbound/mercadopago/mercadopago.adapter';
 import { PrismaAdapter } from './adapters/outbound/prisma/prisma.adapter';
+import { PaymentExpirationProcessor } from './infrastructure/queue/payment-expiration.processor';
 
 @Global()
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true })],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get('REDIS_HOST', 'localhost'),
+          port: config.get('REDIS_PORT', 6379),
+        },
+      }),
+    }),
+    BullModule.registerQueue({
+      name: 'payment-expiration',
+    }),
+  ],
   controllers: [PaymentController],
   providers: [
     BoothWebsocketGateway,
+    PaymentExpirationProcessor,
     {
       provide: PrismaClient,
       useValue: new PrismaClient(),
@@ -49,6 +66,6 @@ import { PrismaAdapter } from './adapters/outbound/prisma/prisma.adapter';
       inject: ['PrismaAdapter', BoothWebsocketGateway],
     },
   ],
-  exports: [PrismaClient],
+  exports: [PrismaClient, BullModule],
 })
 export class AppModule {}

@@ -13,10 +13,23 @@ class BoothController {
   private socket: Socket;
   private reconnectAttempts = 0;
   private maxReconnectDelay = 30000; // 30 segundos máximo
+  private heartbeatInterval: NodeJS.Timeout;
 
   constructor() {
     console.log(`[BOOT] Iniciando controlador para Cabine: ${BOOTH_ID}`);
     this.connect();
+    this.startHeartbeat();
+  }
+
+  private startHeartbeat() {
+    // Log de vida a cada 5 minutos para monitoramento simples
+    this.heartbeatInterval = setInterval(() => {
+      if (this.socket?.connected) {
+        console.log(`[HEARTBEAT] Conectado e operante - ${new Date().toISOString()}`);
+      } else {
+        console.warn(`[HEARTBEAT] Aguardando reconexão... - ${new Date().toISOString()}`);
+      }
+    }, 5 * 60 * 1000);
   }
 
   private connect() {
@@ -52,26 +65,26 @@ class BoothController {
 
     // EVENTO CRÍTICO: Pagamento Aprovado
     this.socket.on('PAYMENT_APPROVED', (data: any) => {
-      console.log('--------------------------------------------------');
+      console.log('\n==================================================');
       console.log(`[OK] PAGAMENTO APROVADO! ID: ${data.boothId}`);
-      console.log(`[OS] Disparando Sparkbooth em ${TRIGGER_DELAY}ms...`);
-      console.log('--------------------------------------------------');
+      console.log(`[OS] AVISO: Garanta que o Sparkbooth está em FOCO (Tela Cheia/Kiosk).`);
+      console.log(`[OS] Disparando "ENTER" em ${TRIGGER_DELAY}ms...`);
+      console.log('==================================================\n');
 
       setTimeout(() => {
         try {
-          // Garante que o foco estará no Sparkbooth (o usuário deve ter o app aberto)
           // RobotJS simula o pressionamento da tecla ENTER
           robot.keyTap('enter');
-          console.log(`[SUCCESS] Tecla ENTER enviada com sucesso.`);
+          console.log(`[SUCCESS] Tecla ENTER enviada. Sparkbooth deve iniciar a sessão.`);
         } catch (err) {
-          console.error(`[ERROR] Falha ao interagir com o teclado:`, err);
+          console.error(`[ERROR] Falha crítica ao interagir com o teclado:`, err);
         }
       }, TRIGGER_DELAY);
     });
 
     // Logger para debug
     this.socket.on('WAITING_PAYMENT', () => {
-      console.log(`[INFO] Cliente iniciou tentativa de pagamento na cabine.`);
+      console.log(`[INFO] Novo cliente detectado - Aguardando QR Code ser escaneado.`);
     });
   }
 }
