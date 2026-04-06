@@ -1,8 +1,14 @@
+export enum PaymentType {
+  PIX = 'pix',
+  CARD = 'card',
+}
+
 export enum PaymentStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   EXPIRED = 'expired',
-  FAILED = 'failed'
+  CANCELLED = 'cancelled',
+  FAILED = 'failed',
 }
 
 export class Payment {
@@ -11,9 +17,11 @@ export class Payment {
     public readonly boothId: string,
     public readonly amount: number,
     public status: PaymentStatus,
+    public readonly paymentType: PaymentType = PaymentType.PIX,
     public readonly externalId: string | null = null,
     public qrCode: string | null = null,
     public qrCodeBase64: string | null = null,
+    public checkoutUrl: string | null = null,
     public readonly createdAt: Date = new Date(),
     public updatedAt: Date = new Date()
   ) {}
@@ -25,6 +33,11 @@ export class Payment {
 
   expire() {
     this.status = PaymentStatus.EXPIRED;
+    this.updatedAt = new Date();
+  }
+
+  cancel() {
+    this.status = PaymentStatus.CANCELLED;
     this.updatedAt = new Date();
   }
 }
