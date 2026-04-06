@@ -7,6 +7,7 @@ import { BoothWebsocketGateway } from './adapters/inbound/websocket/booth.gatewa
 import { CreatePaymentUseCase } from './core/use-cases/create-payment.usecase';
 import { ConfirmPaymentUseCase } from './core/use-cases/confirm-payment.usecase';
 import { ExpirePaymentUseCase } from './core/use-cases/expire-payment.usecase';
+import { SwitchPaymentUseCase } from './core/use-cases/switch-payment.usecase';
 import { MercadoPagoAdapter } from './adapters/outbound/mercadopago/mercadopago.adapter';
 import { PrismaAdapter } from './adapters/outbound/prisma/prisma.adapter';
 import { PaymentExpirationProcessor } from './infrastructure/queue/payment-expiration.processor';
@@ -24,9 +25,7 @@ import { PaymentExpirationProcessor } from './infrastructure/queue/payment-expir
         },
       }),
     }),
-    BullModule.registerQueue({
-      name: 'payment-expiration',
-    }),
+    BullModule.registerQueue({ name: 'payment-expiration' }),
   ],
   controllers: [PaymentController],
   providers: [
@@ -43,27 +42,36 @@ import { PaymentExpirationProcessor } from './infrastructure/queue/payment-expir
     },
     {
       provide: 'MercadoPagoAdapter',
-      useFactory: (config: ConfigService) => 
-        new MercadoPagoAdapter(config.get('MERCADO_PAGO_ACCESS_TOKEN')),
+      useFactory: (config: ConfigService) =>
+        new MercadoPagoAdapter(
+          config.get('MERCADO_PAGO_ACCESS_TOKEN'),
+          config.get('WEBHOOK_BASE_URL'),
+        ),
       inject: [ConfigService],
     },
     {
       provide: CreatePaymentUseCase,
-      useFactory: (mp: MercadoPagoAdapter, pr: PrismaAdapter, ws: BoothWebsocketGateway) => 
+      useFactory: (mp: MercadoPagoAdapter, pr: PrismaAdapter, ws: BoothWebsocketGateway) =>
         new CreatePaymentUseCase(mp, pr, pr, ws),
       inject: ['MercadoPagoAdapter', 'PrismaAdapter', BoothWebsocketGateway],
     },
     {
       provide: ConfirmPaymentUseCase,
-      useFactory: (pr: PrismaAdapter, ws: BoothWebsocketGateway) => 
+      useFactory: (pr: PrismaAdapter, ws: BoothWebsocketGateway) =>
         new ConfirmPaymentUseCase(pr, pr, ws),
       inject: ['PrismaAdapter', BoothWebsocketGateway],
     },
     {
       provide: ExpirePaymentUseCase,
-      useFactory: (pr: PrismaAdapter, ws: BoothWebsocketGateway) => 
+      useFactory: (pr: PrismaAdapter, ws: BoothWebsocketGateway) =>
         new ExpirePaymentUseCase(pr, pr, ws),
       inject: ['PrismaAdapter', BoothWebsocketGateway],
+    },
+    {
+      provide: SwitchPaymentUseCase,
+      useFactory: (mp: MercadoPagoAdapter, pr: PrismaAdapter, ws: BoothWebsocketGateway) =>
+        new SwitchPaymentUseCase(mp, pr, pr, ws),
+      inject: ['MercadoPagoAdapter', 'PrismaAdapter', BoothWebsocketGateway],
     },
   ],
   exports: [PrismaClient, BullModule],
