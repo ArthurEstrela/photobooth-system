@@ -1,0 +1,28 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Booth {
+  id        String   @id @default(uuid())
+  status    String   @default("idle")
+  updatedAt DateTime @updatedAt
+  payments  Payment[]
+}
+
+model Payment {
+  id           String   @id @default(uuid())
+  boothId      String
+  externalId   String?  @unique
+  amount       Float
+  status       String
+  qrCode       String?
+  qrCodeBase64 String?
+  createdAt    Date     @default(now())
+  updatedAt    DateTime @updatedAt
+  booth        Booth    @relation(fields: [boothId], references: [id])
+}
