@@ -1,4 +1,5 @@
 import { PaymentRepositoryPort, BoothStateRepositoryPort, BoothNotifierPort } from '../ports/out/ports';
+import { PaymentStatus } from '../entities/payment.entity';
 import { BoothStatus } from '../entities/booth-state.entity';
 
 export class ConfirmPaymentUseCase {
@@ -8,29 +9,33 @@ export class ConfirmPaymentUseCase {
     private readonly notifier: BoothNotifierPort
   ) {}
 
-  async execute(externalId: string): Promise<void> {
-    const payment = await this.paymentRepository.findByExternalId(externalId);
-    
+  async execute(
+    externalId: string,
+    internalId?: string
+  ): Promise<{ internalId: string } | null> {
+    const payment = internalId
+      ? await this.paymentRepository.findById(internalId)
+      : await this.paymentRepository.findByExternalId(externalId);
+
     if (!payment) {
-      console.error(`Payment not found for externalId: ${externalId}`);
-      return;
+      console.error(`Payment not found. externalId=${externalId} internalId=${internalId ?? 'n/a'}`);
+      return null;
     }
 
-    if (payment.status !== 'pending') {
+    if (payment.status !== PaymentStatus.PENDING) {
       console.warn(`Payment ${payment.id} already processed. Status: ${payment.status}`);
-      return;
+      return { internalId: payment.id };
     }
 
     const boothState = await this.boothStateRepository.getState(payment.boothId);
     if (!boothState.canApprovePayment()) {
       console.error(`Invalid booth state for approval: ${boothState.status}`);
-      return;
+      return null;
     }
 
     payment.approve();
     await this.paymentRepository.save(payment);
     await this.boothStateRepository.updateStatus(payment.boothId, BoothStatus.IN_SESSION);
-    
     await this.notifier.notifyPaymentApproved(payment.boothId);
 
     console.log(JSON.stringify({
@@ -38,7 +43,9 @@ export class ConfirmPaymentUseCase {
       boothId: payment.boothId,
       paymentId: payment.id,
       externalId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }));
+
+    return { internalId: payment.id };
   }
 }
