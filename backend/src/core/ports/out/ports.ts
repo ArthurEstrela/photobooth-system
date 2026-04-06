@@ -2,12 +2,14 @@ import { Payment } from '../entities/payment.entity';
 
 export interface PaymentGatewayPort {
   createPixPayment(boothId: string, amount: number): Promise<Payment>;
+  createCardCheckoutPayment(boothId: string, amount: number): Promise<Payment>;
 }
 
 export interface PaymentRepositoryPort {
   save(payment: Payment): Promise<void>;
   findByExternalId(externalId: string): Promise<Payment | null>;
   findById(id: string): Promise<Payment | null>;
+  findPendingByBoothId(boothId: string): Promise<Payment | null>;
 }
 
 export interface BoothStateRepositoryPort {
