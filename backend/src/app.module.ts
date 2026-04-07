@@ -47,6 +47,8 @@ import { PaymentExpirationProcessor } from './infrastructure/queue/payment-expir
         new MercadoPagoAdapter(
           config.get('MERCADO_PAGO_ACCESS_TOKEN'),
           config.get('WEBHOOK_BASE_URL'),
+          config.get('NODE_ENV') !== 'production',
+          config.get('MP_PAYER_EMAIL'),
         ),
       inject: [ConfigService],
     },

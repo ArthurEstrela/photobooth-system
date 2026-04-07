@@ -9,8 +9,16 @@ export class MercadoPagoAdapter implements PaymentGatewayPort {
   private readonly client: MPPayment;
   private readonly mpConfig: MercadoPagoConfig;
 
-  constructor(accessToken: string, private readonly webhookBaseUrl: string) {
-    this.mpConfig = new MercadoPagoConfig({ accessToken });
+  constructor(
+    accessToken: string,
+    private readonly webhookBaseUrl: string,
+    testToken: boolean = false,
+    private readonly payerEmail: string = 'booth-customer@example.com',
+  ) {
+    this.mpConfig = new MercadoPagoConfig({
+      accessToken,
+      options: testToken ? { testToken: true } : undefined,
+    });
     this.client = new MPPayment(this.mpConfig);
   }
 
@@ -21,7 +29,7 @@ export class MercadoPagoAdapter implements PaymentGatewayPort {
         transaction_amount: amount,
         description: `Photobooth Session - Booth ${boothId}`,
         payment_method_id: 'pix',
-        payer: { email: 'booth-customer@example.com' },
+        payer: { email: this.payerEmail },
         external_reference: id,
         installments: 1,
       },

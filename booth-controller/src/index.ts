@@ -8,6 +8,7 @@ const WS_URL = process.env.BACKEND_WS_URL || 'http://localhost:3000/booth';
 const BOOTH_ID = process.env.BOOTH_ID || 'booth_123';
 const AUTH_TOKEN = process.env.BOOTH_AUTH_TOKEN || '';
 const TRIGGER_DELAY = parseInt(process.env.TRIGGER_DELAY || '2000');
+const TRIGGER_KEY = process.env.TRIGGER_KEY || 'space';
 
 class BoothController {
   private socket!: Socket;
@@ -68,14 +69,13 @@ class BoothController {
       console.log('\n==================================================');
       console.log(`[OK] PAGAMENTO APROVADO! ID: ${data.boothId}`);
       console.log(`[OS] AVISO: Garanta que o Sparkbooth está em FOCO (Tela Cheia/Kiosk).`);
-      console.log(`[OS] Disparando "ENTER" em ${TRIGGER_DELAY}ms...`);
+      console.log(`[OS] Disparando "SPACE" em ${TRIGGER_DELAY}ms...`);
       console.log('==================================================\n');
 
       setTimeout(() => {
         try {
-          // RobotJS simula o pressionamento da tecla ENTER
-          robot.keyTap('enter');
-          console.log(`[SUCCESS] Tecla ENTER enviada. Sparkbooth deve iniciar a sessão.`);
+          robot.keyTap(TRIGGER_KEY);
+          console.log(`[SUCCESS] Tecla SPACE enviada. Sparkbooth deve iniciar a sessão.`);
         } catch (err) {
           console.error(`[ERROR] Falha crítica ao interagir com o teclado:`, err);
         }
