@@ -1,16 +1,23 @@
 # Photobooth System - Run Script (PowerShell)
+# Execute a partir da raiz do projeto: .\run-dev.ps1
 
-Write-Host "--- Iniciando todos os módulos em paralelo ---" -ForegroundColor Cyan
+$root = $PSScriptRoot
+
+Write-Host "--- Iniciando todos os modulos ---" -ForegroundColor Cyan
 
 # Backend
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd backend; npm run start:dev" -WindowStyle Normal
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$root\backend'; npm run start:dev" -WindowStyle Normal
 
 # Frontend
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd frontend; npm run dev" -WindowStyle Normal
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$root\frontend'; npm run dev" -WindowStyle Normal
 
-# Booth Controller
-Write-Host "Aguardando backend iniciar para conectar o Booth Controller..." -ForegroundColor Gray
-Start-Sleep -Seconds 5
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd booth-controller; npm start" -WindowStyle Normal
+# Booth Controller — aguarda o backend subir antes de conectar
+Write-Host "Aguardando backend iniciar (10s)..." -ForegroundColor Gray
+Start-Sleep -Seconds 10
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$root\booth-controller'; npm start" -WindowStyle Normal
 
-Write-Host "Todos os módulos foram disparados em janelas separadas." -ForegroundColor Green
+Write-Host ""
+Write-Host "Modulos disparados em janelas separadas:" -ForegroundColor Green
+Write-Host "  Backend:          http://localhost:3000" -ForegroundColor Cyan
+Write-Host "  Frontend (kiosk): http://localhost:5173" -ForegroundColor Cyan
+Write-Host "  Booth Controller: janela separada (aguardando PAYMENT_APPROVED)" -ForegroundColor Cyan

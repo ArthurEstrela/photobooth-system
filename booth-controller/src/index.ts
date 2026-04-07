@@ -10,10 +10,10 @@ const AUTH_TOKEN = process.env.BOOTH_AUTH_TOKEN || '';
 const TRIGGER_DELAY = parseInt(process.env.TRIGGER_DELAY || '2000');
 
 class BoothController {
-  private socket: Socket;
+  private socket!: Socket;
   private reconnectAttempts = 0;
   private maxReconnectDelay = 30000; // 30 segundos máximo
-  private heartbeatInterval: NodeJS.Timeout;
+  private heartbeatInterval!: NodeJS.Timeout;
 
   constructor() {
     console.log(`[BOOT] Iniciando controlador para Cabine: ${BOOTH_ID}`);
