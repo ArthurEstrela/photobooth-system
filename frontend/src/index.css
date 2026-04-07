@@ -1,126 +1,17 @@
-:root {
-  --primary: #FF2B5E;
-  --bg: #0A0A0A;
-  --text: #FFFFFF;
-  --surface: #1C1C1E;
-}
+/* frontend/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  user-select: none; /* Previne seleção de texto no modo Kiosk */
-  -webkit-touch-callout: none;
-}
+@layer base {
+  * {
+    user-select: none;
+    -webkit-touch-callout: none;
+    box-sizing: border-box;
+  }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Evita scroll na cabine */
-}
-
-#root {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* UI Elements */
-.container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  text-align: center;
-}
-
-.title {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-}
-
-.subtitle {
-  font-size: 1.5rem;
-  color: #888;
-  margin-bottom: 3rem;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 1.5rem 4rem;
-  font-size: 2rem;
-  font-weight: bold;
-  border-radius: 50px;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba(255, 43, 94, 0.3);
-  transition: transform 0.1s;
-}
-
-.btn-primary:active {
-  transform: scale(0.95);
-}
-
-.card {
-  background: var(--surface);
-  padding: 3rem;
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 500px;
-  width: 100%;
-}
-
-.qr-code-wrapper {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  margin: 2rem 0;
-}
-
-.qr-code-img {
-  width: 250px;
-  height: 250px;
-  display: block;
-}
-
-.timer {
-  font-size: 3rem;
-  font-weight: bold;
-  font-variant-numeric: tabular-nums;
-  color: var(--primary);
-}
-
-.pulse {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.loader {
-  border: 4px solid rgba(255,255,255,0.1);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin: 2rem auto;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  body {
+    font-family: 'Inter', sans-serif;
+    overflow: hidden; /* sem scroll no kiosk */
+  }
 }

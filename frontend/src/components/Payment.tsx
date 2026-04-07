@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+// frontend/src/components/Payment.tsx
+import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { CircularTimer } from './CircularTimer';
 import { PaymentData } from '../hooks/useBoothSocket';
 
-const EXPIRATION_SECONDS: Record<string, number> = {
+const TOTAL_SECONDS: Record<string, number> = {
   pix: 2 * 60,
   card: 5 * 60,
 };
@@ -14,80 +16,65 @@ interface PaymentProps {
 
 export const Payment: React.FC<PaymentProps> = ({ paymentData, onSwitch }) => {
   const { qrCodeBase64, checkoutUrl, paymentType, expiresAt } = paymentData;
-  const [timeLeft, setTimeLeft] = useState<string>('');
-
-  useEffect(() => {
-    const expirationTime = new Date(expiresAt).getTime();
-
-    const tick = () => {
-      const distance = expirationTime - Date.now();
-      if (distance <= 0) {
-        setTimeLeft('00:00');
-        return;
-      }
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      setTimeLeft(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-    };
-
-    tick();
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [expiresAt]);
-
   const isPix = paymentType === 'pix';
 
   return (
-    <div className="container">
-      <div className="card pulse">
-        {isPix ? (
-          <>
-            <h2 className="title" style={{ fontSize: '2rem' }}>Pague via Pix</h2>
-            <p className="subtitle" style={{ marginBottom: '1rem' }}>Leia o QR Code com seu aplicativo de banco</p>
-            <div className="qr-code-wrapper">
-              {qrCodeBase64 && (
-                <img
-                  src={`data:image/jpeg;base64,${qrCodeBase64}`}
-                  alt="Pix QR Code"
-                  className="qr-code-img"
-                />
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="title" style={{ fontSize: '2rem' }}>Pague com Cartão</h2>
-            <p className="subtitle" style={{ marginBottom: '1rem' }}>Escaneie com seu celular e pague pelo app do Mercado Pago</p>
-            <div className="qr-code-wrapper">
-              {checkoutUrl && (
-                <QRCodeSVG
-                  value={checkoutUrl}
-                  size={220}
-                  style={{ display: 'block', margin: '0 auto' }}
-                />
-              )}
-            </div>
-          </>
-        )}
+    <div className="flex-1 bg-gray-50 flex flex-col items-center justify-center p-8">
+      <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
+        {/* Abas PIX / Cartão */}
+        <div className="flex border-b border-gray-100">
+          <button
+            onClick={() => !isPix && onSwitch('pix')}
+            className={`flex-1 py-5 text-lg font-semibold transition-colors duration-150 select-none ${
+              isPix
+                ? 'text-gray-900 border-b-2 border-gray-900'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            PIX
+          </button>
+          <button
+            onClick={() => isPix && onSwitch('card')}
+            className={`flex-1 py-5 text-lg font-semibold transition-colors duration-150 select-none ${
+              !isPix
+                ? 'text-gray-900 border-b-2 border-gray-900'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            Cartão
+          </button>
+        </div>
 
-        <div className="timer">{timeLeft}</div>
-        <p style={{ marginTop: '0.5rem', color: '#888', fontSize: '0.85rem' }}>Aguardando confirmação...</p>
+        {/* Conteúdo */}
+        <div className="p-10 flex flex-col items-center gap-8">
+          <p className="text-gray-500 text-center text-lg">
+            {isPix
+              ? 'Escaneie o QR Code com o app do seu banco'
+              : 'Escaneie com seu celular e pague pelo Mercado Pago'}
+          </p>
 
-        <button
-          onClick={() => onSwitch(isPix ? 'card' : 'pix')}
-          style={{
-            marginTop: '1.5rem',
-            background: 'none',
-            border: '1px solid #555',
-            color: '#aaa',
-            padding: '0.5rem 1.2rem',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-          }}
-        >
-          {isPix ? 'Prefiro pagar com Cartão' : 'Prefiro pagar com Pix'}
-        </button>
+          {/* QR Code */}
+          <div className="p-4 bg-gray-50 rounded-2xl">
+            {isPix && qrCodeBase64 && (
+              <img
+                src={`data:image/jpeg;base64,${qrCodeBase64}`}
+                alt="QR Code PIX"
+                className="w-56 h-56"
+              />
+            )}
+            {!isPix && checkoutUrl && (
+              <QRCodeSVG value={checkoutUrl} size={224} />
+            )}
+          </div>
+
+          {/* Timer circular */}
+          <CircularTimer
+            expiresAt={expiresAt}
+            totalSeconds={TOTAL_SECONDS[paymentType] ?? 120}
+          />
+
+          <p className="text-gray-400 text-sm">Aguardando confirmação do pagamento...</p>
+        </div>
       </div>
     </div>
   );
