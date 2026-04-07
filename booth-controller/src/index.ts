@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const WS_URL = process.env.BACKEND_WS_URL || 'http://localhost:3001/booth';
+const WS_URL = process.env.BACKEND_WS_URL || 'http://localhost:3000/booth';
 const BOOTH_ID = process.env.BOOTH_ID || 'booth_123';
 const AUTH_TOKEN = process.env.BOOTH_AUTH_TOKEN || '';
 const TRIGGER_DELAY = parseInt(process.env.TRIGGER_DELAY || '2000');

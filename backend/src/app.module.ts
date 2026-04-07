@@ -8,6 +8,7 @@ import { CreatePaymentUseCase } from './core/use-cases/create-payment.usecase';
 import { ConfirmPaymentUseCase } from './core/use-cases/confirm-payment.usecase';
 import { ExpirePaymentUseCase } from './core/use-cases/expire-payment.usecase';
 import { SwitchPaymentUseCase } from './core/use-cases/switch-payment.usecase';
+import { CompleteSessionUseCase } from './core/use-cases/complete-session.usecase';
 import { MercadoPagoAdapter } from './adapters/outbound/mercadopago/mercadopago.adapter';
 import { PrismaAdapter } from './adapters/outbound/prisma/prisma.adapter';
 import { PaymentExpirationProcessor } from './infrastructure/queue/payment-expiration.processor';
@@ -72,6 +73,11 @@ import { PaymentExpirationProcessor } from './infrastructure/queue/payment-expir
       useFactory: (mp: MercadoPagoAdapter, pr: PrismaAdapter, ws: BoothWebsocketGateway) =>
         new SwitchPaymentUseCase(mp, pr, pr, ws),
       inject: ['MercadoPagoAdapter', 'PrismaAdapter', BoothWebsocketGateway],
+    },
+    {
+      provide: CompleteSessionUseCase,
+      useFactory: (pr: PrismaAdapter) => new CompleteSessionUseCase(pr),
+      inject: ['PrismaAdapter'],
     },
   ],
   exports: [PrismaClient, BullModule],

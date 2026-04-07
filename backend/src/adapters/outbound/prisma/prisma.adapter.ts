@@ -42,7 +42,7 @@ export class PrismaAdapter implements PaymentRepositoryPort, BoothStateRepositor
 
   async findPendingByBoothId(boothId: string): Promise<Payment | null> {
     const p = await this.prisma.payment.findFirst({
-      where: { boothId, status: 'pending' },
+      where: { boothId, status: PaymentStatus.PENDING },
       orderBy: { createdAt: 'desc' },
     });
     if (!p) return null;
