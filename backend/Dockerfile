@@ -20,4 +20,5 @@ COPY package*.json ./
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+# Roda migração do banco antes de iniciar o app
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]

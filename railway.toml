@@ -1,0 +1,10 @@
+[build]
+dockerfilePath = "backend/Dockerfile"
+watchPatterns = ["backend/**"]
+
+[deploy]
+startCommand = "sh -c 'npx prisma migrate deploy && node dist/main.js'"
+healthcheckPath = "/payments/health"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
