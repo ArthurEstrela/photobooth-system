@@ -9,9 +9,8 @@ export class CompleteSessionUseCase {
   async execute(boothId: string): Promise<void> {
     const boothState = await this.boothStateRepository.getState(boothId);
 
-    if (boothState.status !== BoothStatus.IN_SESSION) {
-      // Idempotente — já está idle ou em estado inesperado, não faz nada
-      return;
+    if (boothState.status === BoothStatus.IDLE) {
+      return; // já está idle, nada a fazer
     }
 
     await this.boothStateRepository.updateStatus(boothId, BoothStatus.IDLE);
